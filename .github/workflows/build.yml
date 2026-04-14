@@ -4,26 +4,16 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup MinGW
-      uses: egor-tensin/setup-mingw@v2
-      with:
-        platform: x64
-    
-    - name: Download SQLite
-      run: |
-        curl -L https://www.sqlite.org/2024/sqlite-dll-win64-x64-3460000.zip -o sqlite3.zip
-        7z x sqlite3.zip -y
-        curl -L https://www.sqlite.org/2024/sqlite-amalgamation-3460000.zip -o sqlite.zip
-        7z x sqlite.zip -y
-        copy sqlite-amalgamation-3460000\sqlite3.h include\
+    - name: Install SQLite
+      run: sudo apt-get install -y libsqlite3-dev
     
     - name: Compile
-      run: g++ src/*.cpp -Iinclude -o music_salon.exe -lsqlite3
+      run: g++ src/*.cpp -Iinclude -o music_salon -lsqlite3
     
     - name: Done
       run: echo "Build OK"
