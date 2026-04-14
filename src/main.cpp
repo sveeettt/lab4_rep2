@@ -9,26 +9,26 @@
 using namespace std;
 
 void showMenu(bool isAdmin) {
-    cout << "\n========== МУЗЫКАЛЬНЫЙ САЛОН ==========" << endl;
-    cout << "1. Показать информацию о проданных и оставшихся компактах" << endl;
-    cout << "2. Показать продажи компакта за период" << endl;
-    cout << "3. Показать самый популярный компакт" << endl;
-    cout << "4. Показать самого популярного исполнителя" << endl;
-    cout << "5. Показать статистику по авторам" << endl;
-    cout << "6. Заполнить статистику за период (функция)" << endl;
-    cout << "7. Показать продажи компакта за период (функция)" << endl;
+    cout << "\n========== MUSIC SALON ==========" << endl;
+    cout << "1. Show sold and remaining discs" << endl;
+    cout << "2. Show disc sales by period" << endl;
+    cout << "3. Show most popular disc" << endl;
+    cout << "4. Show top performer" << endl;
+    cout << "5. Show author statistics" << endl;
+    cout << "6. Fill period statistics (function)" << endl;
+    cout << "7. Show disc sales for period (function)" << endl;
 
     if (isAdmin) {
-        cout << "\n--- АДМИНИСТРАТИВНЫЕ ФУНКЦИИ ---" << endl;
-        cout << "8. Добавить новый компакт-диск" << endl;
-        cout << "9. Добавить операцию (поступление/продажа)" << endl;
-        cout << "10. Обновить информацию о компакте" << endl;
-        cout << "11. Удалить компакт-диск" << endl;
+        cout << "\n--- ADMIN FUNCTIONS ---" << endl;
+        cout << "8. Add new disc" << endl;
+        cout << "9. Add operation (income/sale)" << endl;
+        cout << "10. Update disc price" << endl;
+        cout << "11. Delete disc" << endl;
     }
 
-    cout << "0. Выход" << endl;
+    cout << "0. Exit" << endl;
     cout << "===================================" << endl;
-    cout << "Выберите действие: ";
+    cout << "Choice: ";
 }
 
 void addNewCD(sqlite3* db) {
@@ -36,22 +36,22 @@ void addNewCD(sqlite3* db) {
     string date, manufacturer;
     double price;
 
-    cout << "\n--- ДОБАВЛЕНИЕ НОВОГО КОМПАКТ-ДИСКА ---" << endl;
-    cout << "Введите ID диска: ";
+    cout << "\n--- ADD NEW DISC ---" << endl;
+    cout << "Enter disc ID: ";
     cin >> disc_id;
     cin.ignore();
-    cout << "Введите дату изготовления (ГГГГ-ММ-ДД): ";
+    cout << "Enter manufacture date (YYYY-MM-DD): ";
     getline(cin, date);
-    cout << "Введите производителя: ";
+    cout << "Enter manufacturer: ";
     getline(cin, manufacturer);
-    cout << "Введите цену: ";
+    cout << "Enter price: ";
     cin >> price;
 
-    string sql = "INSERT INTO cd_disc (disc_id, manufacture_date, manufacturer, price) VALUES (" +
+    string sql = "INSERT INTO CD_DISC (disc_id, manufacture_date, manufacturer, price) VALUES (" +
         to_string(disc_id) + ", '" + date + "', '" + manufacturer + "', " + to_string(price) + ");";
 
     if (executeSQL(db, sql)) {
-        cout << "Компакт-диск успешно добавлен!" << endl;
+        cout << "Disc added successfully!" << endl;
     }
 }
 
@@ -80,7 +80,6 @@ void addTransaction(sqlite3* db) {
     }
     else {
         cout << "Operation added!" << endl;
-        // Обновляем stock
         Database dbObj("");
         dbObj.updateSTOCKFromTRANSACTIONs();
     }
@@ -88,33 +87,32 @@ void addTransaction(sqlite3* db) {
 
 int main() {
     string db_path;
-    cout << "Введите путь к файлу базы данных: ";
+    cout << "Enter database file path: ";
     cin >> db_path;
 
     Database db(db_path);
     if (!db.connect()) {
-        cerr << "Не удалось подключиться к базе данных!" << endl;
+        cerr << "Failed to connect to database!" << endl;
         return 1;
     }
 
-    // Создаем триггер для предотвращения перепродажи
     createPreventOverSaleTrigger(db.getDB());
 
     string username, password;
-    cout << "\n=== АУТЕНТИФИКАЦИЯ ===" << endl;
-    cout << "Логин: ";
+    cout << "\n=== AUTHENTICATION ===" << endl;
+    cout << "Login: ";
     cin >> username;
-    cout << "Пароль: ";
+    cout << "Password: ";
     cin >> password;
 
     User currentUser;
     if (!authenticate(db.getDB(), username, password, currentUser)) {
-        cout << "Ошибка аутентификации! Неверный логин или пароль." << endl;
+        cout << "Authentication failed! Invalid login or password." << endl;
         return 1;
     }
 
-    cout << "\nДобро пожаловать, " << currentUser.username << "!" << endl;
-    cout << "Ваша роль: " << currentUser.role << endl;
+    cout << "\nWelcome, " << currentUser.username << "!" << endl;
+    cout << "Your role: " << currentUser.role << endl;
 
     bool isAdmin = (currentUser.role == "admin");
     int choice;
@@ -132,11 +130,11 @@ int main() {
         case 2: {
             int disc_id;
             string start, end;
-            cout << "Введите ID компакт-диска: ";
+            cout << "Enter disc ID: ";
             cin >> disc_id;
-            cout << "Введите начальную дату (ГГГГ-ММ-ДД): ";
+            cout << "Enter start date (YYYY-MM-DD): ";
             cin >> start;
-            cout << "Введите конечную дату (ГГГГ-ММ-ДД): ";
+            cout << "Enter end date (YYYY-MM-DD): ";
             cin >> end;
             showSalesByDiscAndPeriod(db.getDB(), disc_id, start, end);
             break;
@@ -156,9 +154,9 @@ int main() {
 
         case 6: {
             string start, end;
-            cout << "Введите начальную дату (ГГГГ-ММ-ДД): ";
+            cout << "Enter start date (YYYY-MM-DD): ";
             cin >> start;
-            cout << "Введите конечную дату (ГГГГ-ММ-ДД): ";
+            cout << "Enter end date (YYYY-MM-DD): ";
             cin >> end;
             fillPeriodStats(db.getDB(), start, end);
             break;
@@ -167,11 +165,11 @@ int main() {
         case 7: {
             int disc_id;
             string start, end;
-            cout << "Введите ID компакт-диска: ";
+            cout << "Enter disc ID: ";
             cin >> disc_id;
-            cout << "Введите начальную дату (ГГГГ-ММ-ДД): ";
+            cout << "Enter start date (YYYY-MM-DD): ";
             cin >> start;
-            cout << "Введите конечную дату (ГГГГ-ММ-ДД): ";
+            cout << "Enter end date (YYYY-MM-DD): ";
             cin >> end;
             showDiscSalesForPeriod(db.getDB(), disc_id, start, end);
             break;
@@ -179,29 +177,29 @@ int main() {
 
         case 8:
             if (isAdmin) addNewCD(db.getDB());
-            else cout << "Доступ запрещен!" << endl;
+            else cout << "Access denied!" << endl;
             break;
 
         case 9:
             if (isAdmin) addTransaction(db.getDB());
-            else cout << "Доступ запрещен!" << endl;
+            else cout << "Access denied!" << endl;
             break;
 
         case 10: {
             if (isAdmin) {
                 int disc_id;
                 double new_price;
-                cout << "Введите ID диска для обновления цены: ";
+                cout << "Enter disc ID to update price: ";
                 cin >> disc_id;
-                cout << "Введите новую цену: ";
+                cout << "Enter new price: ";
                 cin >> new_price;
                 string sql = "UPDATE CD_DISC SET price = " + to_string(new_price) + " WHERE disc_id = " + to_string(disc_id) + ";";
                 if (executeSQL(db.getDB(), sql)) {
-                    cout << "Цена обновлена!" << endl;
+                    cout << "Price updated!" << endl;
                 }
             }
             else {
-                cout << "Доступ запрещен!" << endl;
+                cout << "Access denied!" << endl;
             }
             break;
         }
@@ -209,26 +207,26 @@ int main() {
         case 11:
             if (isAdmin) {
                 int disc_id;
-                cout << "Введите ID диска для удаления: ";
+                cout << "Enter disc ID to delete: ";
                 cin >> disc_id;
                 string sql = "DELETE FROM CD_DISC WHERE disc_id = " + to_string(disc_id) + ";";
                 if (executeSQL(db.getDB(), sql)) {
-                    cout << "Компакт-диск удален!" << endl;
+                    cout << "Disc deleted!" << endl;
                     Database dbObj("");
                     dbObj.updateSTOCKFromTRANSACTIONs();
                 }
             }
             else {
-                cout << "Доступ запрещен!" << endl;
+                cout << "Access denied!" << endl;
             }
             break;
 
         case 0:
-            cout << "До свидания!" << endl;
+            cout << "Goodbye!" << endl;
             break;
 
         default:
-            cout << "Неверный выбор!" << endl;
+            cout << "Invalid choice!" << endl;
         }
 
     } while (choice != 0);

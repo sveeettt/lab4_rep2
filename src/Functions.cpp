@@ -21,10 +21,8 @@ bool createPreventOverSaleTrigger(sqlite3* db) {
         BEGIN
             SELECT CASE
                 WHEN (
-                    SELECT COALESCE(SUM(CASE WHEN operation_type = 'income' THEN quantity ELSE 0 END), 0) -
-                    SELECT COALESCE(SUM(CASE WHEN operation_type = 'sale' THEN quantity ELSE 0 END), 0)
-                    FROM "TRANSACTION" 
-                    WHERE disc_id = NEW.disc_id
+                    (SELECT SUM(CASE WHEN operation_type = 'income' THEN quantity ELSE 0 END) FROM "TRANSACTION" WHERE disc_id = NEW.disc_id) -
+                    (SELECT SUM(CASE WHEN operation_type = 'sale' THEN quantity ELSE 0 END) FROM "TRANSACTION" WHERE disc_id = NEW.disc_id)
                 ) < NEW.quantity
                 THEN RAISE(ABORT, 'ERROR: Not enough discs in stock!')
             END;
@@ -48,8 +46,8 @@ void fillPeriodStats(sqlite3* db, const std::string& startDate, const std::strin
         "   '" + startDate + "', "
         "   '" + endDate + "', "
         "   disc_id, "
-        "   COALESCE(SUM(CASE WHEN operation_type = 'income' THEN quantity ELSE 0 END), 0) as total_income, "
-        "   COALESCE(SUM(CASE WHEN operation_type = 'sale' THEN quantity ELSE 0 END), 0) as total_sold "
+        "   SUM(CASE WHEN operation_type = 'income' THEN quantity ELSE 0 END) as total_income, "
+        "   SUM(CASE WHEN operation_type = 'sale' THEN quantity ELSE 0 END) as total_sold "
         "FROM \"TRANSACTION\" "
         "WHERE operation_date BETWEEN '" + startDate + "' AND '" + endDate + "' "
         "GROUP BY disc_id;";

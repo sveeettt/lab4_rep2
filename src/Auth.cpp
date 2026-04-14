@@ -6,7 +6,7 @@ bool authenticate(sqlite3* db, const std::string& username, const std::string& p
 
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Query preparation error: " << sqlite3_errmsg(db) << std::endl;
         return false;
     }
 
