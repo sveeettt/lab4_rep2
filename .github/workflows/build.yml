@@ -1,0 +1,16 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Compile
+      run: g++ src/*.cpp -Iinclude -o music_salon.exe -lsqlite3
+    
+    - name: Done
+      run: echo "Build OK"
