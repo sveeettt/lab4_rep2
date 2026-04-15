@@ -3,6 +3,8 @@
 
 #include <sqlite3.h>
 #include <string>
+#include <vector>
+
 bool executeSQL(sqlite3* db, const std::string& sql);
 
 bool createPreventOverSaleTrigger(sqlite3* db);

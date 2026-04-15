@@ -199,11 +199,23 @@ bool loadImageFromDisc(sqlite3* db, int disc_id, const std::string& outputPath) 
 
 void showDiscsWithImages(sqlite3* db) {
     const char* sql = "SELECT disc_id, manufacturer, price, length(cover_image) as img_size FROM CD_DISC WHERE cover_image IS NOT NULL;";
-
+    
     std::cout << "\n=== DISCS WITH IMAGES ===" << std::endl;
-    char* errMsg = nullptr;
-    if (sqlite3_exec(db, sql, callback, nullptr, &errMsg) != SQLITE_OK) {
-        std::cerr << "Error: " << errMsg << std::endl;
-        sqlite3_free(errMsg);
+    
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            int disc_id = sqlite3_column_int(stmt, 0);
+            const char* manufacturer = (const char*)sqlite3_column_text(stmt, 1);
+            double price = sqlite3_column_double(stmt, 2);
+            int img_size = sqlite3_column_int(stmt, 3);
+            
+            std::cout << "  disc_id: " << disc_id << std::endl;
+            std::cout << "  manufacturer: " << manufacturer << std::endl;
+            std::cout << "  price: " << price << std::endl;
+            std::cout << "  image_size: " << img_size << " bytes" << std::endl;
+            std::cout << "------------------------" << std::endl;
+        }
+        sqlite3_finalize(stmt);
     }
 }
