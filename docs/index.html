@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Музыкальный салон - Документация</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 10px 0; }
+        a { text-decoration: none; color: #3498db; }
+        a:hover { text-decoration: underline; }
+        .repo-link {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .repo-link:hover { background: #3498db; color: white; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Музыкальный салон</h1>
+    <p>Консольное приложение для автоматизации работы музыкального салона</p>
+
+    <div class="card">
+        <h2>О проекте</h2>
+        <p>Приложение предназначено для учета компакт-дисков, треков, операций поступления и продажи. Поддерживает аутентификацию пользователей с разделением ролей (администратор/пользователь), формирование аналитических отчетов и контроль остатков с помощью триггера.</p>
+    </div>
+
+    <div class="card">
+        <h2>Документация</h2>
+        <ul>
+            <li><a href="glossary.html">Глоссарий</a> - термины предметной области</li>
+            <li><a href="requirements.html">Функциональные требования</a> - Use case диаграмма и сценарии</li>
+            <li><a href="specification.html">Спецификация проекта</a> - диаграммы классов, деятельности, компонентов</li>
+            <li><a href="additional.html">Дополнительная спецификация</a> - нефункциональные требования</li>
+            <li><a href="database.html">Схема базы данных</a> - ER-диаграмма и SQL</li>
+            <li><a href="repository.html">Репозиторий проекта</a> - ссылка на код</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Команда</h2>
+        <ul>
+            <li><strong>Куванова Светлана</strong> - разработка приложения на C++</li>
+            <li><strong>Юрченко Александра</strong> - разработка БД и диаграмм</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Ссылки</h2>
+        <a href="https://github.com/sveeettt/lab4_rep2" class="repo-link"> Код проекта на GitHub</a>
+    </div>
+</body>
+</html>
