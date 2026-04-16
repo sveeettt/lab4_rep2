@@ -23,36 +23,26 @@ jobs:
     - name: Build
       run: cmake --build build
 
-    - name: Run tests directly
+    - name: Run tests
       run: |
         cd build
         ./run_tests
 
-    - name: Debug - check gcda files
+    - name: Generate coverage
       run: |
         cd build
-        echo "=== Checking for .gcda files ==="
-        ls -la *.gcda 2>/dev/null || echo "No .gcda files in root"
-        ls -la CMakeFiles/run_tests.dir/ 2>/dev/null || echo "No run_tests.dir"
-        find . -name "*.gcda" -ls
-
-    - name: Generate coverage report
-      run: |
-        cd build
-        lcov --capture --directory . --output-file coverage.info --no-external --ignore-errors empty
-        lcov --remove coverage.info '/usr/*' --output-file coverage.info --ignore-errors empty
-        lcov --remove coverage.info '*/tests/*' --output-file coverage.info --ignore-errors empty
-        lcov --remove coverage.info '*/_deps/*' --output-file coverage.info --ignore-errors empty
-        lcov --list coverage.info --ignore-errors empty
+        lcov --capture --directory . --output-file coverage.info --no-external --ignore-errors empty,unused
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info --ignore-errors unused
+        lcov --remove coverage.info '*/tests/*' --output-file coverage.info --ignore-errors unused
+        lcov --remove coverage.info '*/_deps/*' --output-file coverage.info --ignore-errors unused
+        lcov --list coverage.info --ignore-errors unused
 
     - name: Upload to Codecov
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./build/coverage.info
-        flags: cpp-tests
-        name: music-salon-coverage
         fail_ci_if_error: false
 
     - name: Done
-      run: echo "Build, tests and coverage completed!"
+      run: echo "Build and tests completed!"
