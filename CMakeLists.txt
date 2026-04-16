@@ -4,9 +4,8 @@ project(MusicSalon)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Флаги покрытия для всех целей
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+# Опция для включения coverage (по умолчанию ВЫКЛЮЧЕНА)
+option(ENABLE_COVERAGE "Enable code coverage reporting" OFF)
 
 # Находим SQLite
 find_package(SQLite3 REQUIRED)
@@ -37,6 +36,19 @@ target_link_libraries(music_salon MusicSalonLib)
 # Исполняемый файл тестов
 add_executable(run_tests tests/test_music_salon.cpp)
 target_link_libraries(run_tests MusicSalonLib gtest_main)
+
+# Флаги покрытия - применяются ТОЛЬКО если ENABLE_COVERAGE=ON
+if(ENABLE_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        message(STATUS "Coverage reporting ENABLED")
+        target_compile_options(MusicSalonLib PRIVATE --coverage -O0 -g)
+        target_link_options(MusicSalonLib PRIVATE --coverage)
+        target_compile_options(run_tests PRIVATE --coverage -O0 -g)
+        target_link_options(run_tests PRIVATE --coverage)
+    else()
+        message(WARNING "Coverage not supported for ${CMAKE_CXX_COMPILER_ID}")
+    endif()
+endif()
 
 # Регистрируем тесты
 enable_testing()
