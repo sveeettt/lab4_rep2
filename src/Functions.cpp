@@ -37,17 +37,17 @@ bool createPreventOverSaleTrigger(sqlite3* db) {
 }
 
 void fillPeriodStats(sqlite3* db, const std::string& startDate, const std::string& endDate) {
-    std::string sqlDelete = "DELETE FROM period_stats WHERE period_start = '" + startDate + "' AND period_end = '" + endDate + "';";
+    std::string sqlDelete = "DELETE FROM period_stats WHERE start_date = '" + startDate + "' AND end_date = '" + endDate + "';";
     executeSQL(db, sqlDelete);
 
     std::string sqlInsert =
-        "INSERT INTO period_stats (period_start, period_end, disc_id, total_income, total_sold) "
+        "INSERT INTO period_stats (start_date, end_date, disc_id, total_income, total_sale) "
         "SELECT "
         "   '" + startDate + "', "
         "   '" + endDate + "', "
         "   disc_id, "
-        "   SUM(CASE WHEN operation_type = 'income' THEN quantity ELSE 0 END) as total_income, "
-        "   SUM(CASE WHEN operation_type = 'sale' THEN quantity ELSE 0 END) as total_sold "
+        "   SUM(CASE WHEN operation_type = 'income' THEN quantity ELSE 0 END), "
+        "   SUM(CASE WHEN operation_type = 'sale' THEN quantity ELSE 0 END) "
         "FROM \"TRANSACTION\" "
         "WHERE operation_date BETWEEN '" + startDate + "' AND '" + endDate + "' "
         "GROUP BY disc_id;";
@@ -56,8 +56,8 @@ void fillPeriodStats(sqlite3* db, const std::string& startDate, const std::strin
         std::cout << "\nPeriod statistics saved" << std::endl;
 
         std::string sqlSelect =
-            "SELECT disc_id, total_income, total_sold FROM period_stats "
-            "WHERE period_start = '" + startDate + "' AND period_end = '" + endDate + "';";
+            "SELECT disc_id, total_income, total_sale FROM period_stats "
+            "WHERE start_date = '" + startDate + "' AND end_date = '" + endDate + "';";
         executeSQL(db, sqlSelect);
     }
 }
@@ -141,8 +141,8 @@ bool saveImageToDisc(sqlite3* db, int disc_id, const std::string& imagePath) {
         return false;
     }
 
-    sqlite3_bind_blob(stmt, 1, imageData.data(), imageData.size(), SQLITE_STATIC);
-    sqlite3_bind_int(stmt, 2, disc_id);
+    sqlite3_bind_blob(stmt, 1, imageData.data(), imageData.size(), SQLITE_STATIC);//Привязывает бинарные данные (картинку)
+    sqlite3_bind_int(stmt, 2, disc_id);//Привязывает ID диска
 
     int rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);

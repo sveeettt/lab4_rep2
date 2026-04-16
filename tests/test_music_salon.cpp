@@ -164,7 +164,7 @@ TEST_F(DatabaseTests, UpdateStockExecutesWithoutError) {
 }
 
 // ============================================================
-// ТЕСТЫ ДЛЯ ФУНКЦИЙ (Functions) - 3 теста (убраны проблемные)
+// ТЕСТЫ ДЛЯ ФУНКЦИЙ (Functions) 
 // ============================================================
 
 class FunctionsTests : public ::testing::Test {
