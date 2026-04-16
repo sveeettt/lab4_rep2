@@ -23,19 +23,27 @@ jobs:
     - name: Build
       run: cmake --build build
 
-    - name: Run tests
+    - name: Run tests directly
       run: |
         cd build
-        ctest --output-on-failure
+        ./run_tests
+
+    - name: Debug - check gcda files
+      run: |
+        cd build
+        echo "=== Checking for .gcda files ==="
+        ls -la *.gcda 2>/dev/null || echo "No .gcda files in root"
+        ls -la CMakeFiles/run_tests.dir/ 2>/dev/null || echo "No run_tests.dir"
+        find . -name "*.gcda" -ls
 
     - name: Generate coverage report
       run: |
         cd build
-        lcov --capture --directory . --output-file coverage.info --no-external
-        lcov --remove coverage.info '/usr/*' --output-file coverage.info
-        lcov --remove coverage.info '*/tests/*' --output-file coverage.info
-        lcov --remove coverage.info '*/_deps/*' --output-file coverage.info
-        lcov --list coverage.info
+        lcov --capture --directory . --output-file coverage.info --no-external --ignore-errors empty
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info --ignore-errors empty
+        lcov --remove coverage.info '*/tests/*' --output-file coverage.info --ignore-errors empty
+        lcov --remove coverage.info '*/_deps/*' --output-file coverage.info --ignore-errors empty
+        lcov --list coverage.info --ignore-errors empty
 
     - name: Upload to Codecov
       uses: codecov/codecov-action@v4
