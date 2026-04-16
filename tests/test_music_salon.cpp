@@ -164,7 +164,7 @@ TEST_F(DatabaseTests, UpdateStockExecutesWithoutError) {
 }
 
 // ============================================================
-// ТЕСТЫ ДЛЯ ФУНКЦИЙ (Functions) 
+// ТЕСТЫ ДЛЯ ФУНКЦИЙ (Functions) - обновлены под новые названия
 // ============================================================
 
 class FunctionsTests : public ::testing::Test {
@@ -183,7 +183,7 @@ protected:
                 quantity INTEGER
             );
             CREATE TABLE STOCK (disc_id INTEGER, total_income INTEGER, total_sold INTEGER, remaining INTEGER);
-            CREATE TABLE period_stats (id INTEGER PRIMARY KEY, period_start TEXT, period_end TEXT, disc_id INTEGER, total_income INTEGER, total_sold INTEGER);
+            CREATE TABLE period_stats (id INTEGER PRIMARY KEY, start_date TEXT, end_date TEXT, disc_id INTEGER, total_income INTEGER, total_sale INTEGER);
             
             INSERT INTO CD_DISC VALUES (1, 19.99);
             INSERT INTO TRANSACTION VALUES (1, '2024-01-01', 'income', 1, 100);
@@ -210,6 +210,11 @@ TEST_F(FunctionsTests, ExecuteSQLInvalid) {
 
 TEST_F(FunctionsTests, FillPeriodStats) {
     EXPECT_NO_THROW(fillPeriodStats(db, "2024-01-01", "2024-12-31"));
+}
+
+TEST_F(FunctionsTests, CreateTrigger) {
+    bool result = createPreventOverSaleTrigger(db);
+    EXPECT_TRUE(result);
 }
 
 // ============================================================
@@ -318,8 +323,92 @@ TEST_F(CRUDTests, SelectDisc) {
 }
 
 // ============================================================
-// ТОЧКА ВХОДА
+// ТЕСТЫ ДЛЯ ТРИГГЕРА - 2 теста
 // ============================================================
+
+class TriggerTests : public ::testing::Test {
+protected:
+    sqlite3* db;
+    
+    void SetUp() override {
+        sqlite3_open(":memory:", &db);
+        const char* sql = R"(
+            CREATE TABLE TRANSACTION (
+                trans_id INTEGER PRIMARY KEY,
+                operation_type TEXT,
+                disc_id INTEGER,
+                quantity INTEGER
+            );
+            CREATE TABLE STOCK (disc_id INTEGER, remaining INTEGER);
+            INSERT INTO STOCK VALUES (1, 50);
+        )";
+        sqlite3_exec(db, sql, nullptr, nullptr, nullptr);
+        createPreventOverSaleTrigger(db);
+    }
+    
+    void TearDown() override {
+        sqlite3_close(db);
+    }
+};
+
+TEST_F(TriggerTests, AllowsSaleWhenStockSufficient) {
+    char* errMsg = nullptr;
+    int rc = sqlite3_exec(db, "INSERT INTO TRANSACTION (operation_type, disc_id, quantity) VALUES ('sale', 1, 30)", nullptr, nullptr, &errMsg);
+    EXPECT_EQ(rc, SQLITE_OK);
+    sqlite3_free(errMsg);
+}
+
+TEST_F(TriggerTests, PreventsSaleWhenStockInsufficient) {
+    char* errMsg = nullptr;
+    int rc = sqlite3_exec(db, "INSERT INTO TRANSACTION (operation_type, disc_id, quantity) VALUES ('sale', 1, 100)", nullptr, nullptr, &errMsg);
+    EXPECT_NE(rc, SQLITE_OK);
+    sqlite3_free(errMsg);
+}
+
+// ============================================================
+// ТЕСТЫ ДЛЯ ИЗОБРАЖЕНИЙ - 3 теста
+// ============================================================
+
+class ImageTests : public ::testing::Test {
+protected:
+    sqlite3* db;
+    
+    void SetUp() override {
+        sqlite3_open(":memory:", &db);
+        const char* sql = R"(
+            CREATE TABLE CD_DISC (
+                disc_id INTEGER PRIMARY KEY,
+                manufacturer TEXT,
+                price REAL,
+                cover_image BLOB
+            );
+            INSERT INTO CD_DISC VALUES (1, 'Sony', 19.99, NULL);
+        )";
+        sqlite3_exec(db, sql, nullptr, nullptr, nullptr);
+    }
+    
+    void TearDown() override {
+        sqlite3_close(db);
+    }
+};
+
+TEST_F(ImageTests, ReadImageFileNotFound) {
+    std::vector<unsigned char> result = readImageFile("non_existent_file.jpg");
+    EXPECT_TRUE(result.empty());
+}
+
+TEST_F(ImageTests, ShowDiscsWithImagesNoCrash) {
+    EXPECT_NO_THROW(showDiscsWithImages(db));
+}
+
+TEST_F(ImageTests, SaveAndLoadImage) {
+    // Этот тест требует реальный файл, поэтому просто проверяем что функции не падают
+    bool result = saveImageToDisc(db, 1, "test.jpg");
+    // Файла нет, поэтому результат false
+    EXPECT_FALSE(result);
+}
+
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
