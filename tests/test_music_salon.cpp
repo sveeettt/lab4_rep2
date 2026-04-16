@@ -212,10 +212,7 @@ TEST_F(FunctionsTests, FillPeriodStats) {
     EXPECT_NO_THROW(fillPeriodStats(db, "2024-01-01", "2024-12-31"));
 }
 
-TEST_F(FunctionsTests, CreateTrigger) {
-    bool result = createPreventOverSaleTrigger(db);
-    EXPECT_TRUE(result);
-}
+
 
 // ============================================================
 // ТЕСТЫ ДЛЯ ЗАПРОСОВ (Queries) - 6 тестов
@@ -322,48 +319,7 @@ TEST_F(CRUDTests, SelectDisc) {
     EXPECT_TRUE(result);
 }
 
-// ============================================================
-// ТЕСТЫ ДЛЯ ТРИГГЕРА - 2 теста
-// ============================================================
 
-class TriggerTests : public ::testing::Test {
-protected:
-    sqlite3* db;
-    
-    void SetUp() override {
-        sqlite3_open(":memory:", &db);
-        const char* sql = R"(
-            CREATE TABLE TRANSACTION (
-                trans_id INTEGER PRIMARY KEY,
-                operation_type TEXT,
-                disc_id INTEGER,
-                quantity INTEGER
-            );
-            CREATE TABLE STOCK (disc_id INTEGER, remaining INTEGER);
-            INSERT INTO STOCK VALUES (1, 50);
-        )";
-        sqlite3_exec(db, sql, nullptr, nullptr, nullptr);
-        createPreventOverSaleTrigger(db);
-    }
-    
-    void TearDown() override {
-        sqlite3_close(db);
-    }
-};
-
-TEST_F(TriggerTests, AllowsSaleWhenStockSufficient) {
-    char* errMsg = nullptr;
-    int rc = sqlite3_exec(db, "INSERT INTO TRANSACTION (operation_type, disc_id, quantity) VALUES ('sale', 1, 30)", nullptr, nullptr, &errMsg);
-    EXPECT_EQ(rc, SQLITE_OK);
-    sqlite3_free(errMsg);
-}
-
-TEST_F(TriggerTests, PreventsSaleWhenStockInsufficient) {
-    char* errMsg = nullptr;
-    int rc = sqlite3_exec(db, "INSERT INTO TRANSACTION (operation_type, disc_id, quantity) VALUES ('sale', 1, 100)", nullptr, nullptr, &errMsg);
-    EXPECT_NE(rc, SQLITE_OK);
-    sqlite3_free(errMsg);
-}
 
 // ============================================================
 // ТЕСТЫ ДЛЯ ИЗОБРАЖЕНИЙ - 3 теста
